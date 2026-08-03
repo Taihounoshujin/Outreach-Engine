@@ -1,0 +1,47 @@
+app:
+  jwt:
+    secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LW5vdC1mb3ItcHJvZHVjdGlvbi1taW5pbXVtLTI1Ni1iaXRz}
+    expiration-ms: 86400000
+
+spring:
+  application:
+    name: outreach-engine
+  profiles:
+    active: dev
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/outreach}
+    username: ${DB_USER:outreach}
+    password: ${DB_PASSWORD:outreach}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_TLS:false}
+
+outreach:
+  scheduler:
+    enabled: true
+    interval-ms: 60000
+    batch-size: 50
+  sending:
+    provider: smtp
+    default-from-name: ${FROM_NAME:Outreach Demo}
+    default-from-email: ${FROM_EMAIL:hello@localhost}
+    unsubscribe-base-url: ${UNSUBSCRIBE_BASE_URL:http://localhost:8080/u}
+    physical-address: ${PHYSICAL_ADDRESS:123 Example St, Columbia, MO 65201}
+
+logging:
+  level:
+    com.rushil.outreach: DEBUG
