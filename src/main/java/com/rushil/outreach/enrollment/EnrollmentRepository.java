@@ -33,4 +33,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
             for update skip locked
             """, nativeQuery = true)
     List<Enrollment> claimDueEnrollments(@Param("batchSize") int batchSize);
+
+    List<Enrollment> findAllByCampaignId(UUID campaignId);
+
+    boolean existsByCampaignIdAndLeadId(UUID campaignId, UUID leadId);
+
+    List<Enrollment> findAllByLeadIdAndStatus(UUID leadId, EnrollmentStatus status);
 }

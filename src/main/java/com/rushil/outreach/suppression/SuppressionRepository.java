@@ -8,6 +8,6 @@ import java.util.UUID;
 
 public interface SuppressionRepository extends JpaRepository<SuppressionEntry, UUID> {
 
-
+    boolean existsByOwnerIdAndEmail(UUID ownerId, String email);
     Page<SuppressionEntry> findAllByOwnerId(UUID ownerId, Pageable pageable);
 }
