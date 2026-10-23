@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-// Spring Security bridge. Loads a User from the database and wraps it
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -22,7 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        // Spring Security's built-in UserDetails implementation.
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPasswordHash(),

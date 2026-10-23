@@ -31,7 +31,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader(HEADER);
 
-        // No token → skip auth; downstream security rules will decide what to do.
         if (authHeader == null || !authHeader.startsWith(PREFIX)) {
             chain.doFilter(request, response);
             return;
@@ -43,14 +42,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             email = jwtService.extractEmail(token);
         } catch (Exception e) {
-            // Malformed / expired token — let the request continue unauthenticated.
-            // Protected endpoints will return 401 via Spring Security.
             chain.doFilter(request, response);
             return;
         }
 
-        // If we have an email AND nothing is authenticated in this thread yet,
-        // load the user and populate the security context.
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 

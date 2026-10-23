@@ -14,18 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Handles opt-outs arriving from the link in a sent email.
- *
- * <p>The token is the {@code email_send} id: unguessable, scoped to one message,
- * and it identifies the recipient without putting their address in a URL that ends
- * up in server logs and referrer headers.
- *
- * <p>Opting out suppresses the address for the whole owner account, not just this
- * campaign. Someone who says stop means stop — quietly continuing to mail them from
- * a different campaign of the same sender is exactly what CAN-SPAM's opt-out
- * requirement exists to prevent.
- */
 @Service
 public class UnsubscribeService {
 
@@ -53,8 +41,6 @@ public class UnsubscribeService {
 
         suppression.suppress(ownerId, email, SuppressionReason.UNSUBSCRIBED);
 
-        // Stop every active sequence this lead is in for this owner, not just the
-        // one they happened to click from.
         List<Enrollment> active = enrollments.findAllByLeadIdAndStatus(
                 source.getLead().getId(), EnrollmentStatus.ACTIVE);
 

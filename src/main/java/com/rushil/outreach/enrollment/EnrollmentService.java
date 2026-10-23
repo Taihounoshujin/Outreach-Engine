@@ -47,15 +47,6 @@ public class EnrollmentService {
         this.currentUser = currentUser;
     }
 
-    /**
-     * Enrolls leads into a campaign and schedules their first step.
-     *
-     * <p>Suppressed addresses are filtered here as well as in the dispatcher. That
-     * is intentional duplication: checking at enrollment keeps opted-out people out
-     * of the queue entirely, while the dispatcher check catches anyone who
-     * unsubscribes after enrolling. Only the second one is load-bearing for
-     * compliance, but the first keeps the queue honest.
-     */
     @Transactional
     public List<EnrollmentResponse> enroll(UUID campaignId, List<UUID> leadIds) {
         UUID ownerId = currentUser.requireId();
@@ -97,7 +88,6 @@ public class EnrollmentService {
                 .toList();
     }
 
-    /** Manual stop, e.g. the user saw a reply land in their own inbox. */
     @Transactional
     public EnrollmentResponse markReplied(UUID campaignId, UUID enrollmentId) {
         campaigns.findByIdAndOwnerId(campaignId, currentUser.requireId())

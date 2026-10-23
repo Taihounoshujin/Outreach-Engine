@@ -16,6 +16,5 @@ public class ApiError {
     private String message;
     private String path;
 
-    /** Populated for validation errors — one entry per invalid field. */
     private List<String> details;
 }

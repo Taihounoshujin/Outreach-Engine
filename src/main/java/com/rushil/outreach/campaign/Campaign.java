@@ -32,11 +32,6 @@ public class Campaign extends BaseEntity {
     @Column(name = "from_email", nullable = false, length = 320)
     private String fromEmail;
 
-    /**
-     * Hard ceiling on sends per day for this campaign. Not yet enforced by the
-     * scheduler — see the gap list in SETUP.md. Real mailboxes should stay well
-     * under ~50/day; the default here is deliberately conservative.
-     */
     @Column(name = "daily_cap", nullable = false)
     private int dailyCap = 40;
 

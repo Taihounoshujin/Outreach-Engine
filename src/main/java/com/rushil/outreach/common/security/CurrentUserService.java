@@ -9,14 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-/**
- * Resolves the authenticated user for the current request.
- *
- * <p>Every service that touches owner-scoped data goes through here rather than
- * accepting an ownerId parameter from a controller. A controller that can pass in
- * an id is a controller that can pass in the wrong id, and that is exactly the
- * shape of a multi-tenant data leak.
- */
 @Service
 public class CurrentUserService {
 

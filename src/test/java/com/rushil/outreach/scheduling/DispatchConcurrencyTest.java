@@ -41,19 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * The load-bearing test for this system.
- *
- * <p>The whole design rests on one claim: several application instances can run the
- * dispatch scheduler at the same time without a lead ever receiving the same email
- * twice. Duplicate cold email is the fastest route to a spam complaint, so this is
- * a correctness requirement rather than a nice-to-have.
- *
- * <p>Deliberately NOT annotated {@code @Transactional}. A test-managed transaction
- * would wrap both worker threads in one context and roll everything back at the
- * end, which would hide exactly the cross-transaction behaviour being tested. Data
- * is cleaned explicitly instead.
- */
 @Import(DispatchConcurrencyTest.TestSenderConfig.class)
 class DispatchConcurrencyTest extends AbstractIntegrationTest {
 
@@ -112,9 +99,6 @@ class DispatchConcurrencyTest extends AbstractIntegrationTest {
 
         for (int i = 0; i < workers; i++) {
             results.add(pool.submit(() -> {
-                // Both threads block here, then hit the claiming query together —
-                // without the gate they would run sequentially and the test would
-                // pass even with the locking removed.
                 startGate.await();
                 return dispatchService.processDueBatch();
             }));
@@ -163,12 +147,6 @@ class DispatchConcurrencyTest extends AbstractIntegrationTest {
         assertThat(reloaded.getStatus()).isEqualTo(EnrollmentStatus.UNSUBSCRIBED);
     }
 
-    /**
-     * Replaces the SMTP adapter so tests never touch a mail server.
-     *
-     * <p>This is the payoff for putting an interface at the sending boundary: the
-     * whole dispatch path runs unchanged with a recording double underneath.
-     */
     @TestConfiguration
     static class TestSenderConfig {
 
@@ -184,9 +162,6 @@ class DispatchConcurrencyTest extends AbstractIntegrationTest {
 
         @Override
         public SendOutcome send(OutboundEmail email) {
-            // A small delay widens the window in which both workers hold their
-            // claimed rows, making a locking regression fail reliably rather than
-            // intermittently.
             try {
                 Thread.sleep(25);
             } catch (InterruptedException e) {

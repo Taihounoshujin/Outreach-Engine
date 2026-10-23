@@ -19,20 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-/**
- * Seeds one owner, one campaign, two sequence steps, one lead, and one active
- * enrollment scheduled to fire immediately.
- *
- * <p>Run with {@code --spring.profiles.active=dev} and the first scheduler tick
- * (~10s after startup) should deliver step 1 into MailHog at http://localhost:8025.
- * That single message is the walking skeleton: it proves the schema, the entity
- * mappings, the claiming query, the suppression gate, the idempotency insert, and
- * the SMTP adapter all work together.
- *
- * <p>Delete this class — or keep it behind the dev profile — before deploying
- * anywhere real. It writes directly through repositories and skips every service
- * layer validation on purpose.
- */
 @Component
 @Profile("dev")
 public class DevSeedRunner implements CommandLineRunner {
@@ -60,14 +46,11 @@ public class DevSeedRunner implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // Idempotent: restarting the app must not pile up duplicate seed data.
         if (users.findByEmail(SEED_OWNER_EMAIL).isPresent()) {
             log.info("Seed data already present — skipping");
             return;
         }
 
-        // NOTE: adjust this to match your own User constructor / builder from
-        // TaskFlow. The password hash here is a throwaway placeholder.
         User owner = new User();
         owner.setEmail(SEED_OWNER_EMAIL);
         owner.setPasswordHash("{noop}seed-only-not-a-real-password");

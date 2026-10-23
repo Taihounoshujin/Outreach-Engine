@@ -4,9 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-/**
- * Payload for POST /api/auth/login.
- */
 @Getter
 @Setter
 @NoArgsConstructor

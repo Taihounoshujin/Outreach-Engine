@@ -9,15 +9,6 @@ import jakarta.persistence.PrePersist;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * For tables that record when a row was created but not when it was last touched.
- *
- * <p>Sends, suppression entries, and sequence steps are log-like: they are written
- * once and their history matters more than their latest edit, so the schema gives
- * them {@code created_at} only. Extending {@link BaseEntity} here would map an
- * {@code updated_at} column that does not exist and fail Hibernate's schema
- * validation on startup.
- */
 @MappedSuperclass
 public abstract class CreatedEntity {
 

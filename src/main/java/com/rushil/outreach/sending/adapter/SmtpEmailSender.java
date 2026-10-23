@@ -15,10 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Plain SMTP adapter. Points at MailHog locally (localhost:1025, web UI on :8025),
- * where every message is captured and nothing leaves the machine.
- */
 @Component
 @ConditionalOnProperty(name = "outreach.sending.provider", havingValue = "smtp", matchIfMissing = true)
 public class SmtpEmailSender implements EmailSender {

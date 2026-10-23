@@ -49,12 +49,6 @@ public class Lead extends BaseEntity {
     @Column(nullable = false, length = 64)
     private LeadSource source = LeadSource.MANUAL;
 
-    /**
-     * Free-form scraped or enriched context — site copy, recent posts, tech stack.
-     * Kept as JSONB rather than columns because the personalization service will
-     * keep changing what it wants to collect, and schema-migrating on every change
-     * would be painful for data that is only ever read as a blob.
-     */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> enrichment = new HashMap<>();

@@ -9,17 +9,6 @@ import jakarta.persistence.Table;
 
 import java.util.UUID;
 
-/**
- * A permanent do-not-contact record.
- *
- * <p>Stores {@code ownerId} as a raw UUID rather than a {@code @ManyToOne User},
- * because this is checked on every single send and a lazy association would drag a
- * proxy load into the hot path for no benefit. Nothing here ever needs the rest of
- * the user.
- *
- * <p>There is deliberately no delete method on the repository. Removing a
- * suppression entry would mean resuming contact with someone who opted out.
- */
 @Entity
 @Table(name = "suppression")
 public class SuppressionEntry extends CreatedEntity {

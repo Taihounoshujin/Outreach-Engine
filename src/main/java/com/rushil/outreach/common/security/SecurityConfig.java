@@ -33,7 +33,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                // Stateless — no server-side session; JWT carries all auth state.
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -49,11 +48,9 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
                 )
-                // H2 console renders in an iframe — allow same-origin frames.
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
-                // Insert our JWT filter BEFORE Spring's username/password filter.
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

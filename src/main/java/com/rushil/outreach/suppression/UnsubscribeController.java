@@ -12,13 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-/**
- * Public opt-out endpoint. Must stay unauthenticated — recipients have no account.
- *
- * <p>Remember to permit {@code /u/**} in SecurityConfig; an unsubscribe link behind
- * a login wall is a broken unsubscribe link, and a broken one is a compliance
- * problem rather than a cosmetic bug.
- */
 @RestController
 @RequestMapping("/u")
 @Tag(name = "Unsubscribe", description = "Public opt-out endpoint linked from every email")
@@ -48,11 +41,6 @@ public class UnsubscribeController {
                         """);
     }
 
-    /**
-     * RFC 8058 one-click unsubscribe. Mailbox providers POST here directly when the
-     * recipient clicks the native unsubscribe button, so it must succeed without a
-     * confirmation page and without any user interaction.
-     */
     @PostMapping("/{token}")
     @Operation(summary = "One-click unsubscribe (RFC 8058), called by mailbox providers")
     public ResponseEntity<Void> oneClickUnsubscribe(@PathVariable UUID token) {

@@ -6,18 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/**
- * Polls for due work on a fixed interval.
- *
- * <p>The tick itself is deliberately thin: it owns no logic beyond "run a batch and
- * don't die." All the interesting behaviour lives in {@link DispatchService}, which
- * makes the batch testable without waiting on a timer.
- *
- * <p>Concurrency is handled inside the claiming query rather than here, so running
- * several instances of this application is safe. That is a better shape than a
- * distributed lock like ShedLock, which would serialize the work — SKIP LOCKED lets
- * instances share the queue and work in parallel.
- */
 @Component
 @ConditionalOnProperty(name = "outreach.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 public class DispatchScheduler {

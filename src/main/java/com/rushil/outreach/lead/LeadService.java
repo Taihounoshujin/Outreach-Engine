@@ -38,14 +38,6 @@ public class LeadService {
         return mapper.toResponse(leads.save(apply(new Lead(owner, email), request)));
     }
 
-    /**
-     * Bulk create, skipping addresses already on file.
-     *
-     * <p>Skipping rather than failing the whole batch is the right behaviour for
-     * imports: a 500-row CSV with three duplicates should load 497 leads, not
-     * reject the file. Duplicates are silently ignored because re-importing a
-     * list is a normal thing users do.
-     */
     @Transactional
     public List<LeadResponse> createBatch(List<CreateLeadRequest> requests) {
         User owner = currentUser.require();

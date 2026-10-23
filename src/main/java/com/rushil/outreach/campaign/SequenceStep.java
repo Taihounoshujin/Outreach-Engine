@@ -8,14 +8,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-/**
- * One email in a campaign's sequence.
- *
- * <p>{@code delayDays} is the wait *before* this step relative to the previous one,
- * so step 1 is normally 0 and later steps carry the follow-up gap. The unique
- * constraint on (campaign_id, step_order) is what lets the dispatcher look up "the
- * next step" by a simple integer increment.
- */
 @Entity
 @Table(name = "sequence_step")
 public class SequenceStep extends CreatedEntity {

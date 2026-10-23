@@ -8,12 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * OpenAPI (Swagger) configuration.
- * <p>
- * Access the UI at http://localhost:8080/swagger-ui.html
- * Raw OpenAPI JSON at  http://localhost:8080/v3/api-docs
- */
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
@@ -34,5 +28,4 @@ import org.springframework.context.annotation.Configuration;
         description = "Paste your JWT here (without the 'Bearer ' prefix — Swagger adds it automatically)"
 )
 public class OpenApiConfig {
-    // No methods needed — the annotations do everything.
 }

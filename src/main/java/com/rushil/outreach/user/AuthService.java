@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-// Handles login: verifies credentials, issues JWT.
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -49,13 +48,11 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Verify email + password
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(), request.getPassword())
         );
 
-        // Load user for the response body, credentials valid
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found: " + request.getEmail()));

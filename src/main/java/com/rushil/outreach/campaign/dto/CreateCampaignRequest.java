@@ -17,9 +17,6 @@ public record CreateCampaignRequest(
         @NotBlank @Email @Size(max = 320)
         String fromEmail,
 
-        // Capped at 200 deliberately. Real mailboxes that send more than ~50 cold
-        // emails a day get throttled or blocked by the receiving providers, so a
-        // higher ceiling would only help a user hurt their own domain reputation.
         @Min(1) @Max(200)
         Integer dailyCap,
 

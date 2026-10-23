@@ -14,16 +14,6 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-/**
- * One attempt to deliver one step to one lead.
- *
- * <p>The unique constraint on (enrollment_id, step_id) in the schema is the
- * idempotency key for the whole system. The dispatcher inserts this row *before*
- * calling the mail provider, so a crash between insert and send leaves a QUEUED row
- * that a retry collides with rather than a silent duplicate delivery. That ordering
- * is deliberate and easy to break by "optimising" the insert to happen after the
- * send — don't.
- */
 @Entity
 @Table(name = "email_send")
 public class EmailSend extends CreatedEntity {
