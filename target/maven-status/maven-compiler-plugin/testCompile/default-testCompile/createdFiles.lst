@@ -1,0 +1,4 @@
+com\rushil\outreach\scheduling\DispatchConcurrencyTest.class
+com\rushil\outreach\AbstractIntegrationTest.class
+com\rushil\outreach\scheduling\DispatchConcurrencyTest$RecordingEmailSender.class
+com\rushil\outreach\scheduling\DispatchConcurrencyTest$TestSenderConfig.class
