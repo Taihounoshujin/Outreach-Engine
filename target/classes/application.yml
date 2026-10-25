@@ -1,13 +1,6 @@
-app:
-  jwt:
-    secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LW5vdC1mb3ItcHJvZHVjdGlvbi1taW5pbXVtLTI1Ni1iaXRz}
-    expiration-ms: 86400000
-
 spring:
   application:
     name: outreach-engine
-  profiles:
-    active: dev
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/outreach}
     username: ${DB_USER:outreach}
@@ -41,7 +34,20 @@ outreach:
     default-from-email: ${FROM_EMAIL:hello@localhost}
     unsubscribe-base-url: ${UNSUBSCRIBE_BASE_URL:http://localhost:8080/u}
     physical-address: ${PHYSICAL_ADDRESS:123 Example St, Columbia, MO 65201}
+  personalization:
+    # "template" = plain placeholders, no network. "anthropic" = LLM-written opener.
+    provider: ${PERSONALIZATION_PROVIDER:template}
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      model: ${ANTHROPIC_MODEL:claude-haiku-5-5}
+      max-tokens: 200
+      read-timeout: 20s
 
 logging:
   level:
     com.rushil.outreach: DEBUG
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000

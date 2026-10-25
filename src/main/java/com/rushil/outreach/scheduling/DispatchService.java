@@ -9,6 +9,8 @@ import com.rushil.outreach.sending.EmailSendRepository;
 import com.rushil.outreach.sending.port.EmailSender;
 import com.rushil.outreach.sending.port.OutboundEmail;
 import com.rushil.outreach.sending.port.SendOutcome;
+import com.rushil.outreach.personalization.port.ComposedEmail;
+import com.rushil.outreach.personalization.port.EmailComposer;
 import com.rushil.outreach.suppression.SuppressionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +35,7 @@ public class DispatchService {
     private final EmailSendRepository sends;
     private final SuppressionService suppression;
     private final EmailSender emailSender;
+    private final EmailComposer composer;
 
     @Value("${outreach.scheduler.batch-size:50}")
     private int batchSize;
@@ -45,14 +48,26 @@ public class DispatchService {
             SequenceStepRepository steps,
             EmailSendRepository sends,
             SuppressionService suppression,
-            EmailSender emailSender) {
+            EmailSender emailSender,
+            EmailComposer composer) {
         this.enrollments = enrollments;
         this.steps = steps;
         this.sends = sends;
         this.suppression = suppression;
         this.emailSender = emailSender;
+        this.composer = composer;
     }
 
+    /**
+     * Claims and processes one batch of due enrollments.
+     *
+     * <p>The whole batch runs in a single transaction, which keeps the row locks held
+     * for its duration. That is fine at small batch sizes and is the simplest thing
+     * that is correct. It does mean a slow SMTP server stretches the transaction, so
+     * once send volume grows this should become: claim ids in a short transaction,
+     * then process each enrollment in its own. Worth noting in the README as a known
+     * trade-off rather than pretending it isn't one.
+     */
     @Transactional
     public int processDueBatch() {
         List<Enrollment> due = enrollments.claimDueEnrollments(batchSize);
@@ -85,9 +100,23 @@ public class DispatchService {
         var owner = enrollment.getCampaign().getOwner();
         String recipient = enrollment.getLead().getEmail();
 
+        // The compliance gate. Nothing sends without passing through here.
+        if (suppression.isSuppressed(owner.getId(), recipient)) {
+            recordSkip(enrollment, step, recipient, "recipient suppressed");
+            enrollment.markUnsubscribed();
+            return;
+        }
+
+        // Idempotency: claim the (enrollment, step) pair in the database BEFORE
+        // talking to the mail provider. The unique constraint on those two columns
+        // means a retry after a mid-send crash collides here and stops, rather than
+        // sending the same message to the same person twice.
+        // Composition happens before the idempotency insert so the stored row holds
+        // exactly what was sent — including any model-written text, which is not
+        // reproducible later.
+        ComposedEmail composed = composer.compose(step, enrollment.getLead());
         EmailSend send = new EmailSend(enrollment, step, recipient,
-                render(step.getSubjectTemplate(), enrollment),
-                render(step.getBodyTemplate(), enrollment));
+                composed.subject(), composed.htmlBody());
         try {
             sends.saveAndFlush(send);
         } catch (DataIntegrityViolationException alreadySent) {
@@ -106,6 +135,9 @@ public class DispatchService {
                 send.getBody(),
                 stripHtml(send.getBody()),
                 Map.of(
+                        // RFC 8058 one-click unsubscribe. Mailbox providers surface this
+                        // as a native button, and honoring it well measurably improves
+                        // inbox placement.
                         "List-Unsubscribe", "<" + unsubscribeBaseUrl + "/" + send.getId() + ">",
                         "List-Unsubscribe-Post", "List-Unsubscribe=One-Click")));
 
@@ -114,6 +146,9 @@ public class DispatchService {
             scheduleNext(enrollment, nextOrder);
         } else {
             send.markFailed(result.failureReason());
+            // A soft failure leaves the enrollment active so the next tick retries;
+            // a hard bounce should suppress the address permanently. Distinguishing
+            // the two properly belongs in the webhook handler, once that exists.
             log.warn("Send rejected for enrollment {}: {}", enrollment.getId(), result.failureReason());
         }
     }
@@ -137,20 +172,7 @@ public class DispatchService {
         sends.save(skipped);
     }
 
-    private String render(String template, Enrollment enrollment) {
-        var lead = enrollment.getLead();
-        return template
-                .replace("{{contact_name}}", nullSafe(lead.getContactName()))
-                .replace("{{company_name}}", nullSafe(lead.getCompanyName()))
-                .replace("{{industry}}", nullSafe(lead.getIndustry()))
-                .replace("{{city}}", nullSafe(lead.getCity()));
-    }
-
     private String stripHtml(String html) {
         return html.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
-    }
-
-    private String nullSafe(String value) {
-        return value == null ? "" : value;
     }
 }
