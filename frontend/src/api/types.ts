@@ -33,3 +33,43 @@ export interface ApiErrorBody {
   path: string;
   details?: string[] | null;
 }
+
+// ---- campaigns ----
+
+export type CampaignStatus = 'DRAFT' | 'RUNNING' | 'PAUSED' | 'ARCHIVED';
+
+export interface CampaignResponse {
+  id: string;
+  name: string;
+  status: CampaignStatus;
+  fromName: string;
+  fromEmail: string;
+  dailyCap: number;
+  timeZone: string;
+  createdAt: string; // ISO-8601 instant from the backend
+}
+
+export interface CreateCampaignRequest {
+  name: string;
+  fromName: string;
+  fromEmail: string;
+  dailyCap?: number;
+  timeZone?: string;
+}
+
+// ---- sequence steps ----
+
+export interface SequenceStepResponse {
+  id: string;
+  stepOrder: number;
+  delayDays: number;
+  subjectTemplate: string;
+  bodyTemplate: string;
+}
+
+export interface CreateSequenceStepRequest {
+  stepOrder: number;
+  delayDays: number;
+  subjectTemplate: string;
+  bodyTemplate: string;
+}
